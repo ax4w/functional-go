@@ -14,6 +14,7 @@ Functional-Go implements common functional programming patterns and operations s
 - **Higher-order functions**: `Map`, `Filter`, and function composition
 - **Folding**: Left fold (`Foldl`) and right fold (`Foldr`) operations
 - **Zipping**: Combine lists with `Zip` and `ZipWith`
+- **Predicate functions**: Test elements with `Any` and `All`
 
 ## Installation
 
@@ -89,6 +90,10 @@ func main() {
     double := func(x int) int { return x * 2 }
     addOneThenDouble := f.Compose(double, addOne)
     result := addOneThenDouble(3) // (3 + 1) * 2 = 8
+    
+    // Predicate functions
+    hasEven := f.Any(nums, func(x int) bool { return x%2 == 0 }) // true
+    allPositive := f.All(nums, func(x int) bool { return x > 0 }) // true
 }
 ```
 
@@ -124,11 +129,17 @@ func main() {
 - `ZipWith[A, B, C](fn func(A, B) C, srcA []A, srcB []B) []C`: Combines elements using function
 - `Zip[A, B](srcA []A, srcB []B) []Tuple[A, B]`: Combines elements into tuples
 
+### Predicate Functions
+
+- `Any[A](src []A, fn func(A) bool) bool`: Returns true if any element satisfies the predicate
+- `All[A](src []A, fn func(A) bool) bool`: Returns true if all elements satisfy the predicate
+
 ## Notes
 
 - Most functions that operate on empty slices will return empty slices or the accumulator
 - `Head`, `Tail`, and `Last` will panic when called on empty slices
 - For zipping operations, the result length is determined by the shorter input slice
+- `Any` on an empty slice returns false, while `All` on an empty slice returns true
 
 ## License
 
