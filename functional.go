@@ -1,9 +1,11 @@
 package functionalgo
 
-type Tuple[A any, B any] struct {
-	fst A
-	snd B
-}
+type (
+	Tuple[A any, B any] struct {
+		fst A
+		snd B
+	}
+)
 
 func Take[A ~[]any](src A, num int) A {
 	if num > len(src) {
@@ -18,6 +20,7 @@ func Drop[A ~[]any](src A, num int) A {
 	}
 	return src[num+1:]
 }
+
 func Head[A any, B ~[]A](src B) A {
 	if len(src) == 0 {
 		panic("cannot take head of empty list")
@@ -62,6 +65,9 @@ func Foldl[A any, B any](fn func(B, A) B, acc B, src []A) B {
 }
 
 func Foldr[A any, B any](fn func(A, B) B, acc B, src []A) B {
+	if len(src) == 0 {
+		return acc
+	}
 	if len(src) == 1 {
 		return fn(Head(src), acc)
 	}
@@ -114,4 +120,42 @@ func All[A any](fn func(A) bool, src []A) bool {
 		return false
 	}
 	return All(fn, Tail(src))
+}
+
+func Sum[A int8 | int16 | int32 | int64 | int | float32 | float64](src []A) A {
+	return Foldr(func(acc A, x A) A {
+		return acc + x
+	}, A(0), src)
+}
+
+func Product[A int8 | int16 | int32 | int64 | int | float32 | float64](src []A) A {
+	return Foldr(func(acc A, x A) A {
+		return acc * x
+	}, A(0), src)
+}
+
+func FlattenWith[A comparable, B any, C any](fn func(A, B) C, src map[A]B) (result []C) {
+	for k, v := range src {
+		result = append(result, fn(k, v))
+	}
+	return result
+}
+
+func Flatten[A comparable, B any](src map[A]B) (result []Tuple[A, B]) {
+	return FlattenWith(func(a A, b B) Tuple[A, B] {
+		return Tuple[A, B]{fst: a, snd: b}
+	}, src)
+}
+
+func Maximum[A comparable](src []A) A {
+	if len(src) == 0 {
+		panic("called maximum on empty list")
+	}
+	return Foldl(func(acc A, x A) A {
+		if Compare(acc, x) == GT {
+			return acc
+		} else {
+			return x
+		}
+	}, src[0], src)
 }

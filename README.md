@@ -15,6 +15,7 @@ Functional-Go implements common functional programming patterns and operations s
 - **Folding**: Left fold (`Foldl`) and right fold (`Foldr`) operations
 - **Zipping**: Combine lists with `Zip` and `ZipWith`
 - **Predicate functions**: Test elements with `Any` and `All`
+- **Comparison**: Generic comparison with `Compare`
 
 ## Installation
 
@@ -94,6 +95,32 @@ func main() {
     // Predicate functions
     hasEven := f.Any(nums, func(x int) bool { return x%2 == 0 }) // true
     allPositive := f.All(nums, func(x int) bool { return x > 0 }) // true
+    
+    // Comparison examples
+    if f.Compare(5, 10) == f.LT {
+        fmt.Println("5 is less than 10") // will print
+    }
+    
+    if f.Compare("apple", "banana") == f.LT {
+        fmt.Println("'apple' comes before 'banana'") // will print
+    }
+    
+    if f.Compare(true, false) == f.GT {
+        fmt.Println("true is greater than false") // will print
+    }
+    
+    // Comparison with custom types
+    type Person struct {
+        Name string
+        Age  int
+    }
+    
+    p1 := Person{Name: "Alice", Age: 30}
+    p2 := Person{Name: "Alice", Age: 30}
+    
+    if f.Compare(p1, p2) == f.EQ {
+        fmt.Println("p1 and p2 are the same person") // will print
+    }
 }
 ```
 
@@ -134,12 +161,22 @@ func main() {
 - `Any[A](src []A, fn func(A) bool) bool`: Returns true if any element satisfies the predicate
 - `All[A](src []A, fn func(A) bool) bool`: Returns true if all elements satisfy the predicate
 
+### Comparison
+
+- `ComparisonResult`: An enum type representing the result of a comparison (`LT`, `EQ`, or `GT`)
+- `Compare[T any](a, b T) ComparisonResult`: Compares two values of the same type and returns:
+  - `LT` if `a` is less than `b`
+  - `EQ` if `a` equals `b`
+  - `GT` if `a` is greater than `b`
+  - Works with primitive types (numbers, strings, booleans) and custom types
+
 ## Notes
 
 - Most functions that operate on empty slices will return empty slices or the accumulator
 - `Head`, `Tail`, and `Last` will panic when called on empty slices
 - For zipping operations, the result length is determined by the shorter input slice
 - `Any` on an empty slice returns false, while `All` on an empty slice returns true
+- `Compare` works best with primitive types; for custom types it can determine equality but ordering is arbitrary
 
 ## License
 

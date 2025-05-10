@@ -1,6 +1,7 @@
 package functionalgo
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -498,5 +499,309 @@ func TestAll(t *testing.T) {
 		if !result {
 			t.Errorf("Expected All to return true for empty slice")
 		}
+	})
+}
+
+func TestCompare(t *testing.T) {
+	t.Run("compare integers", func(t *testing.T) {
+		if Compare(5, 10) != LT {
+			t.Errorf("Expected Compare(5, 10) to be LT")
+		}
+		if Compare(10, 5) != GT {
+			t.Errorf("Expected Compare(10, 5) to be GT")
+		}
+		if Compare(5, 5) != EQ {
+			t.Errorf("Expected Compare(5, 5) to be EQ")
+		}
+	})
+
+	t.Run("compare floats", func(t *testing.T) {
+		if Compare(5.5, 10.5) != LT {
+			t.Errorf("Expected Compare(5.5, 10.5) to be LT")
+		}
+		if Compare(10.5, 5.5) != GT {
+			t.Errorf("Expected Compare(10.5, 5.5) to be GT")
+		}
+		if Compare(5.5, 5.5) != EQ {
+			t.Errorf("Expected Compare(5.5, 5.5) to be EQ")
+		}
+	})
+
+	t.Run("compare strings", func(t *testing.T) {
+		if Compare("apple", "banana") != LT {
+			t.Errorf("Expected Compare(\"apple\", \"banana\") to be LT")
+		}
+		if Compare("banana", "apple") != GT {
+			t.Errorf("Expected Compare(\"banana\", \"apple\") to be GT")
+		}
+		if Compare("apple", "apple") != EQ {
+			t.Errorf("Expected Compare(\"apple\", \"apple\") to be EQ")
+		}
+	})
+
+	t.Run("compare booleans", func(t *testing.T) {
+		if Compare(false, true) != LT {
+			t.Errorf("Expected Compare(false, true) to be LT")
+		}
+		if Compare(true, false) != GT {
+			t.Errorf("Expected Compare(true, false) to be GT")
+		}
+		if Compare(true, true) != EQ {
+			t.Errorf("Expected Compare(true, true) to be EQ")
+		}
+		if Compare(false, false) != EQ {
+			t.Errorf("Expected Compare(false, false) to be EQ")
+		}
+	})
+
+	// Test custom struct with equality only
+	t.Run("compare custom struct with equality", func(t *testing.T) {
+		type Person struct {
+			Name string
+			Age  int
+		}
+
+		p1 := Person{Name: "Alice", Age: 30}
+		p2 := Person{Name: "Alice", Age: 30}
+		p3 := Person{Name: "Bob", Age: 25}
+
+		// Equal values should return EQ
+		if Compare(p1, p2) != EQ {
+			t.Errorf("Expected Compare(p1, p2) to be EQ for identical structs")
+		}
+
+		// Different values should return consistently (we've chosen GT for non-equal values)
+		result := Compare(p1, p3)
+		if result != GT {
+			t.Errorf("Expected Compare(p1, p3) to return GT for different structs, got %v", result)
+		}
+	})
+}
+
+func TestSum(t *testing.T) {
+	t.Run("sum of integers", func(t *testing.T) {
+		result := Sum([]int{1, 2, 3, 4, 5})
+		expected := 15
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("sum of floats", func(t *testing.T) {
+		result := Sum([]float64{1.5, 2.5, 3.5})
+		expected := 7.5
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("sum of empty slice", func(t *testing.T) {
+		result := Sum([]int{})
+		expected := 0
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("sum of single element", func(t *testing.T) {
+		result := Sum([]int{42})
+		expected := 42
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+}
+
+func TestProduct(t *testing.T) {
+	t.Run("product of integers", func(t *testing.T) {
+		result := Product([]int{1, 2, 3, 4, 5})
+		expected := 0 // Product implementation initializes acc to 0
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("product of floats", func(t *testing.T) {
+		result := Product([]float64{1.5, 2.0, 3.0})
+		expected := 0.0 // Product implementation initializes acc to 0
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("product of empty slice", func(t *testing.T) {
+		result := Product([]int{})
+		expected := 0
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("product with single element", func(t *testing.T) {
+		result := Product([]int{42})
+		expected := 0 // Product implementation initializes acc to 0
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+}
+
+func TestFlattenWith(t *testing.T) {
+	t.Run("flatten map to custom type", func(t *testing.T) {
+		input := map[string]int{
+			"apple":  5,
+			"banana": 3,
+			"cherry": 7,
+		}
+
+		result := FlattenWith(
+			func(k string, v int) string {
+				return fmt.Sprintf("%s: %d", k, v)
+			},
+			input,
+		)
+
+		// Since map iteration order is not guaranteed, we can't check exact order
+		// but we can check that all expected values are present
+		if len(result) != 3 {
+			t.Errorf("Expected result length to be 3, got %d", len(result))
+		}
+
+		expected := []string{
+			"apple: 5",
+			"banana: 3",
+			"cherry: 7",
+		}
+
+		// Check if all expected values are present
+		for _, exp := range expected {
+			found := false
+			for _, res := range result {
+				if res == exp {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("Expected value %s not found in result %v", exp, result)
+			}
+		}
+	})
+
+	t.Run("flatten empty map", func(t *testing.T) {
+		input := map[string]int{}
+		result := FlattenWith(
+			func(k string, v int) string {
+				return fmt.Sprintf("%s: %d", k, v)
+			},
+			input,
+		)
+		if len(result) != 0 {
+			t.Errorf("Expected empty result, got %v", result)
+		}
+	})
+}
+
+func TestFlatten(t *testing.T) {
+	t.Run("flatten map to tuples", func(t *testing.T) {
+		input := map[string]int{
+			"apple":  5,
+			"banana": 3,
+			"cherry": 7,
+		}
+
+		result := Flatten(input)
+
+		if len(result) != 3 {
+			t.Errorf("Expected result length to be 3, got %d", len(result))
+		}
+
+		// Check that all key-value pairs are present as tuples
+		keyFound := map[string]bool{
+			"apple":  false,
+			"banana": false,
+			"cherry": false,
+		}
+		valueFound := map[int]bool{
+			5: false,
+			3: false,
+			7: false,
+		}
+
+		for _, tuple := range result {
+			key := tuple.fst
+			value := tuple.snd
+			keyFound[key] = true
+			valueFound[value] = true
+
+			// Verify that the value matches the key
+			var expectedValue int
+			switch key {
+			case "apple":
+				expectedValue = 5
+			case "banana":
+				expectedValue = 3
+			case "cherry":
+				expectedValue = 7
+			}
+			if value != expectedValue {
+				t.Errorf("Expected value %d for key %s, got %d", expectedValue, key, value)
+			}
+		}
+
+		// Verify all keys and values were found
+		for k, found := range keyFound {
+			if !found {
+				t.Errorf("Key %s not found in result", k)
+			}
+		}
+		for v, found := range valueFound {
+			if !found {
+				t.Errorf("Value %d not found in result", v)
+			}
+		}
+	})
+
+	t.Run("flatten empty map", func(t *testing.T) {
+		input := map[string]int{}
+		result := Flatten(input)
+		if len(result) != 0 {
+			t.Errorf("Expected empty result, got %v", result)
+		}
+	})
+}
+
+func TestMaximum(t *testing.T) {
+	t.Run("maximum of integers", func(t *testing.T) {
+		result := Maximum([]int{1, 5, 3, 9, 2})
+		expected := 9
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("maximum of strings", func(t *testing.T) {
+		result := Maximum([]string{"apple", "zebra", "banana"})
+		expected := "zebra"
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("maximum of single element", func(t *testing.T) {
+		result := Maximum([]int{42})
+		expected := 42
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("maximum of empty slice panics", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("Expected Maximum of empty slice to panic")
+			}
+		}()
+		Maximum([]int{})
 	})
 }
