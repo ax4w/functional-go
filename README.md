@@ -1,4 +1,5 @@
-# Functional-Go
+![image](https://github.com/user-attachments/assets/83629097-4ddd-4500-8837-2c8ca6fb4dc6)
+
 
 A lightweight library that provides functional programming utilities for Go, leveraging Go's generics support.
 
