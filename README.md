@@ -16,6 +16,8 @@ Functional-Go implements common functional programming patterns and operations s
 - **Zipping**: Combine lists with `Zip` and `ZipWith`
 - **Predicate functions**: Test elements with `Any` and `All`
 - **Comparison**: Generic comparison with `Compare`
+- **Numeric operations**: `Sum`, `Product`, `Maximum`, and `Minimum`
+- **Map operations**: Convert maps to lists with `Flatten` and `FlattenWith`
 
 ## Installation
 
@@ -170,13 +172,26 @@ func main() {
   - `GT` if `a` is greater than `b`
   - Works with primitive types (numbers, strings, booleans) and custom types
 
+### Numeric Operations
+
+- `Sum[A numeric](src []A) A`: Returns the sum of all elements in a numeric slice
+- `Product[A numeric](src []A) A`: Returns the product of all elements in a numeric slice (Note: currently always returns 0 due to implementation)
+- `Maximum[A comparable](src []A) A`: Returns the maximum element in a slice
+- `Minimum[A comparable](src []A) A`: Returns the minimum element in a slice
+
+### Map Operations
+
+- `FlattenWith[A, B, C](fn func(A, B) C, src map[A]B) []C`: Converts a map to a slice by applying a function to each key-value pair
+- `Flatten[A, B](src map[A]B) []Tuple[A, B]`: Converts a map to a slice of key-value tuples
+
 ## Notes
 
 - Most functions that operate on empty slices will return empty slices or the accumulator
-- `Head`, `Tail`, and `Last` will panic when called on empty slices
+- `Head`, `Tail`, `Last`, `Maximum`, and `Minimum` will panic when called on empty slices
 - For zipping operations, the result length is determined by the shorter input slice
 - `Any` on an empty slice returns false, while `All` on an empty slice returns true
 - `Compare` works best with primitive types; for custom types it can determine equality but ordering is arbitrary
+- `Product` currently has a bug where it initializes the accumulator to 0, meaning it always returns 0
 
 ## License
 

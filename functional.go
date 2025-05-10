@@ -159,3 +159,16 @@ func Maximum[A comparable](src []A) A {
 		}
 	}, src[0], src)
 }
+
+func Minimum[A comparable](src []A) A {
+	if len(src) == 0 {
+		panic("called minimum on empty list")
+	}
+	return Foldl(func(acc A, x A) A {
+		if Compare(acc, x) == LT {
+			return acc
+		} else {
+			return x
+		}
+	}, src[0], src)
+}

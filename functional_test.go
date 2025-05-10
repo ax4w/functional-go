@@ -805,3 +805,38 @@ func TestMaximum(t *testing.T) {
 		Maximum([]int{})
 	})
 }
+
+func TestMinimum(t *testing.T) {
+	t.Run("minimum of integers", func(t *testing.T) {
+		result := Minimum([]int{5, 1, 3, 9, 2})
+		expected := 1
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("minimum of strings", func(t *testing.T) {
+		result := Minimum([]string{"zebra", "apple", "banana"})
+		expected := "apple"
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("minimum of single element", func(t *testing.T) {
+		result := Minimum([]int{42})
+		expected := 42
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("minimum of empty slice panics", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("Expected Minimum of empty slice to panic")
+			}
+		}()
+		Minimum([]int{})
+	})
+}
