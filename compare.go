@@ -3,9 +3,9 @@ package functionalgo
 type ComparisonResult int
 
 const (
-	LT ComparisonResult = iota - 1
-	EQ
-	GT
+	LT ComparisonResult = iota - 1 // Less than
+	EQ                             // Equal
+	GT                             // Greater than
 )
 
 func (c ComparisonResult) String() string {
