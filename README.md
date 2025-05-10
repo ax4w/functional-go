@@ -18,7 +18,7 @@ Functional-Go implements common functional programming patterns and operations s
 ## Installation
 
 ```bash
-go get github.com/username/functional-go
+go get github.com/ax4w/functional-go
 ```
 
 ## Usage
