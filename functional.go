@@ -13,32 +13,48 @@ type (
 	}
 )
 
-func Take[A ~[]any](src A, num int) A {
-	if num > len(src) {
-		return src
+func Guard[T any](cond bool, fn func() T) GuardS[T] {
+	return GuardS[T]{
+		cond: cond,
+		fn:   fn,
 	}
-	return src[:num]
+}
+
+func Guards[T any](guards ...GuardS[T]) T {
+	for _, v := range guards {
+		if v.cond {
+			return v.fn()
+		}
+	}
+	panic("not exhaustive guards")
+}
+
+func Take[A ~[]any](src A, num int) A {
+	return Guards(
+		Guard(num > len(src), func() A { return src }),
+		Guard(true, func() A { return src[:num] }),
+	)
 }
 
 func Drop[A ~[]any](src A, num int) A {
-	if num > len(src) {
-		return A{}
-	}
-	return src[num+1:]
+	return Guards(
+		Guard(num > len(src), func() A { return src[:0] }),
+		Guard(true, func() A { return src[num+1:] }),
+	)
 }
 
 func Head[A any, B ~[]A](src B) A {
-	if len(src) == 0 {
-		panic("cannot take head of empty list")
-	}
-	return src[0]
+	return Guards(
+		Guard(len(src) == 0, func() A { panic("cannot take head of empty list") }),
+		Guard(true, func() A { return src[0] }),
+	)
 }
 
 func Tail[A any, B ~[]A](src B) B {
-	if len(src) == 0 {
-		panic("cannot take tail of empty list")
-	}
-	return src[1:]
+	return Guards(
+		Guard(len(src) == 0, func() B { panic("cannot take head of empty list") }),
+		Guard(true, func() B { return src[1:] }),
+	)
 }
 
 func Map[A any, B any](fn func(A) B, src []A) (result []B) {
@@ -64,27 +80,27 @@ func Compose[A any, B any, C any](fnB func(B) C, fnA func(A) B) func(A) C {
 }
 
 func Foldl[A any, B any](fn func(B, A) B, acc B, src []A) B {
-	if len(src) == 0 {
-		return acc
-	}
-	return Foldl(fn, fn(acc, Head(src)), Tail(src))
+	return Guards(
+		Guard(len(src) == 0, func() B { return acc }),
+		Guard(true, func() B { return Foldl(fn, fn(acc, Head(src)), Tail(src)) }),
+	)
 }
 
 func Foldr[A any, B any](fn func(A, B) B, acc B, src []A) B {
-	if len(src) == 0 {
-		return acc
-	}
-	if len(src) == 1 {
-		return fn(Head(src), acc)
-	}
-	return fn(Head(src), Foldr(fn, acc, Tail(src)))
+	return Guards(
+		Guard(len(src) == 0, func() B { return acc }),
+		Guard(len(src) == 1, func() B { return fn(Head(src), acc) }),
+		Guard(true, func() B { return fn(Head(src), Foldr(fn, acc, Tail(src))) }),
+	)
 }
 
 func ZipWith[A any, B any, C any](fn func(A, B) C, srcA []A, srcB []B) (result []C) {
-	if len(srcA) == 0 || len(srcB) == 0 {
-		return nil
-	}
-	return append(append(result, fn(Head(srcA), Head(srcB))), ZipWith(fn, Tail(srcA), Tail(srcB))...)
+	return Guards(
+		Guard(len(srcA) == 0 || len(srcB) == 0, func() []C { return nil }),
+		Guard(true, func() []C {
+			return append(append(result, fn(Head(srcA), Head(srcB))), ZipWith(fn, Tail(srcA), Tail(srcB))...)
+		}),
+	)
 }
 
 func Zip[A any, B any](srcA []A, srcB []B) (result []Tuple[A, B]) {
@@ -102,30 +118,28 @@ func Snd[A any, B any](t Tuple[A, B]) B {
 }
 
 func Last[A any](src []A) A {
-	if len(src) == 0 {
-		panic("cant get last element of empty slice")
-	}
-	return src[len(src)-1]
+	return Guards(
+		Guard(len(src) == 0, func() A { panic("cant get last element of empty slice") }),
+		Guard(true, func() A { return src[len(src)-1] }),
+	)
 }
 
 func Any[A any](fn func(A) bool, src []A) bool {
-	if len(src) == 0 {
-		return false
-	}
-	if fn(Head(src)) {
-		return true
-	}
-	return Any(fn, Tail(src))
+	return Guards(
+		Guard(len(src) == 0, func() bool { return false }),
+		Guard(len(src) > 0 && fn(Head(src)), func() bool { return true }),
+		Guard(len(src) > 0, func() bool { return Any(fn, Tail(src)) }),
+		Guard(true, func() bool { return false }), // Fallback, sollte nie erreicht werden
+	)
 }
 
 func All[A any](fn func(A) bool, src []A) bool {
-	if len(src) == 0 {
-		return true
-	}
-	if !fn(Head(src)) {
-		return false
-	}
-	return All(fn, Tail(src))
+	return Guards(
+		Guard(len(src) == 0, func() bool { return true }),
+		Guard(len(src) > 0 && !fn(Head(src)), func() bool { return false }),
+		Guard(len(src) > 0, func() bool { return All(fn, Tail(src)) }),
+		Guard(true, func() bool { return true }), // Fallback, sollte nie erreicht werden
+	)
 }
 
 func Sum[A int8 | int16 | int32 | int64 | int | float32 | float64](src []A) A {
@@ -154,43 +168,32 @@ func Flatten[A comparable, B any](src map[A]B) (result []Tuple[A, B]) {
 }
 
 func Maximum[A comparable](src []A) A {
-	if len(src) == 0 {
-		panic("called maximum on empty list")
-	}
-	return Foldl(func(acc A, x A) A {
-		if Compare(acc, x) == GT {
-			return acc
-		} else {
-			return x
-		}
-	}, src[0], src)
+	return Guards(
+		Guard(len(src) == 0, func() A { panic("called maximum on empty list") }),
+		Guard(true, func() A {
+			return Foldl(func(acc A, x A) A {
+				if Compare(acc, x) == GT {
+					return acc
+				} else {
+					return x
+				}
+			}, src[0], src)
+		}),
+	)
+
 }
 
 func Minimum[A comparable](src []A) A {
-	if len(src) == 0 {
-		panic("called minimum on empty list")
-	}
-	return Foldl(func(acc A, x A) A {
-		if Compare(acc, x) == LT {
-			return acc
-		} else {
-			return x
-		}
-	}, src[0], src)
-}
-
-func Guard[T any](cond bool, fn func() T) GuardS[T] {
-	return GuardS[T]{
-		cond: cond,
-		fn:   fn,
-	}
-}
-
-func Guards[T any](guards ...GuardS[T]) T {
-	for _, v := range guards {
-		if v.cond {
-			return v.fn()
-		}
-	}
-	panic("not exhaustive guards")
+	return Guards(
+		Guard(len(src) == 0, func() A { panic("called minimum on empty list") }),
+		Guard(true, func() A {
+			return Foldl(func(acc A, x A) A {
+				if Compare(acc, x) == LT {
+					return acc
+				} else {
+					return x
+				}
+			}, src[0], src)
+		}),
+	)
 }
