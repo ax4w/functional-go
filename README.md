@@ -19,6 +19,7 @@ Functional-Go implements common functional programming patterns and operations s
 - **Numeric operations**: `Sum`, `Product`, `Maximum`, and `Minimum`
 - **Map operations**: Convert maps to lists with `Flatten` and `FlattenWith`
 - **Pattern matching**: Haskell-like guard expressions with `Guard` and `Guards`
+- **List generation**: Create repeated lists with `Replicate`
 
 ## Installation
 
@@ -133,6 +134,17 @@ func main() {
 - `ZipWith[A, B, C](fn func(A, B) C, srcA []A, srcB []B) []C`: Combines elements using function
 - `Zip[A, B](srcA []A, srcB []B) []Tuple[A, B]`: Combines elements into tuples
 
+### Pattern Matching
+
+- `Guard[T any](cond bool, fn func() T) GuardS[T]`: Creates a guarded expression that will be evaluated only if its condition is true
+- `Guards[T any](guards ...GuardS[T]) T`: Evaluates a series of guards and returns the result of the first one with a true condition
+  - Panics with "not exhaustive guards" if no guard condition is true
+
+### List Generation
+
+- `Replicate[T any](n int, val T) []T`: Creates a slice containing n copies of val
+  - Returns an empty slice if n is zero or negative
+
 ### Predicate Functions
 
 - `Any[A](src []A, fn func(A) bool) bool`: Returns true if any element satisfies the predicate
@@ -158,12 +170,6 @@ func main() {
 
 - `FlattenWith[A, B, C](fn func(A, B) C, src map[A]B) []C`: Converts a map to a slice by applying a function to each key-value pair
 - `Flatten[A, B](src map[A]B) []Tuple[A, B]`: Converts a map to a slice of key-value tuples
-
-### Pattern Matching
-
-- `Guard[T any](cond bool, fn func() T) GuardS[T]`: Creates a guarded expression that will be evaluated only if its condition is true
-- `Guards[T any](guards ...GuardS[T]) T`: Evaluates a series of guards and returns the result of the first one with a true condition
-  - Panics with "not exhaustive guards" if no guard condition is true
 
 ## Notes
 

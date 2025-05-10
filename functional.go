@@ -192,3 +192,10 @@ func Guards[T any](guards ...GuardS[T]) T {
 	}
 	panic("not exhaustive guards")
 }
+
+func Replicate[T any](n int, val T) (result []T) {
+	if n == 0 {
+		return nil
+	}
+	return append(append(result, val), Replicate(n-1, val)...)
+}

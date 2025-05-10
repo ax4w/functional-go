@@ -904,3 +904,50 @@ func TestGuards(t *testing.T) {
 		}
 	})
 }
+
+func TestReplicate(t *testing.T) {
+	t.Run("replicate integer value", func(t *testing.T) {
+		result := Replicate(3, 5)
+		expected := []int{5, 5, 5}
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("replicate string value", func(t *testing.T) {
+		result := Replicate(4, "hello")
+		expected := []string{"hello", "hello", "hello", "hello"}
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("replicate struct value", func(t *testing.T) {
+		type Person struct {
+			Name string
+			Age  int
+		}
+		person := Person{Name: "Alice", Age: 30}
+		result := Replicate(2, person)
+		expected := []Person{person, person}
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("replicate with n=0", func(t *testing.T) {
+		result := Replicate(0, 42)
+		expected := []int{}
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("replicate with negative n", func(t *testing.T) {
+		result := Replicate(-2, "test")
+		expected := []string{}
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+}
