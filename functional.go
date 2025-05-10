@@ -95,3 +95,23 @@ func Last[A any](src []A) A {
 	}
 	return src[len(src)-1]
 }
+
+func Any[A any](src []A, fn func(A) bool) bool {
+	if len(src) == 0 {
+		return false
+	}
+	if fn(Head(src)) {
+		return true
+	}
+	return Any(Tail(src), fn)
+}
+
+func All[A any](src []A, fn func(A) bool) bool {
+	if len(src) == 0 {
+		return true
+	}
+	if !fn(Head(src)) {
+		return false
+	}
+	return All(Tail(src), fn)
+}
