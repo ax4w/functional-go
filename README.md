@@ -18,6 +18,7 @@ Functional-Go implements common functional programming patterns and operations s
 - **Comparison**: Generic comparison with `Compare`
 - **Numeric operations**: `Sum`, `Product`, `Maximum`, and `Minimum`
 - **Map operations**: Convert maps to lists with `Flatten` and `FlattenWith`
+- **Pattern matching**: Haskell-like guard expressions with `Guard` and `Guards`
 
 ## Installation
 
@@ -97,32 +98,6 @@ func main() {
     // Predicate functions
     hasEven := f.Any(nums, func(x int) bool { return x%2 == 0 }) // true
     allPositive := f.All(nums, func(x int) bool { return x > 0 }) // true
-    
-    // Comparison examples
-    if f.Compare(5, 10) == f.LT {
-        fmt.Println("5 is less than 10") // will print
-    }
-    
-    if f.Compare("apple", "banana") == f.LT {
-        fmt.Println("'apple' comes before 'banana'") // will print
-    }
-    
-    if f.Compare(true, false) == f.GT {
-        fmt.Println("true is greater than false") // will print
-    }
-    
-    // Comparison with custom types
-    type Person struct {
-        Name string
-        Age  int
-    }
-    
-    p1 := Person{Name: "Alice", Age: 30}
-    p2 := Person{Name: "Alice", Age: 30}
-    
-    if f.Compare(p1, p2) == f.EQ {
-        fmt.Println("p1 and p2 are the same person") // will print
-    }
 }
 ```
 
@@ -184,14 +159,18 @@ func main() {
 - `FlattenWith[A, B, C](fn func(A, B) C, src map[A]B) []C`: Converts a map to a slice by applying a function to each key-value pair
 - `Flatten[A, B](src map[A]B) []Tuple[A, B]`: Converts a map to a slice of key-value tuples
 
+### Pattern Matching
+
+- `Guard[T any](cond bool, fn func() T) GuardS[T]`: Creates a guarded expression that will be evaluated only if its condition is true
+- `Guards[T any](guards ...GuardS[T]) T`: Evaluates a series of guards and returns the result of the first one with a true condition
+  - Panics with "not exhaustive guards" if no guard condition is true
+
 ## Notes
 
 - Most functions that operate on empty slices will return empty slices or the accumulator
-- `Head`, `Tail`, `Last`, `Maximum`, and `Minimum` will panic when called on empty slices
+- `Head`, `Tail`, and `Last` will panic when called on empty slices
 - For zipping operations, the result length is determined by the shorter input slice
 - `Any` on an empty slice returns false, while `All` on an empty slice returns true
-- `Compare` works best with primitive types; for custom types it can determine equality but ordering is arbitrary
-- `Product` currently has a bug where it initializes the accumulator to 0, meaning it always returns 0
 
 ## License
 

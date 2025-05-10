@@ -5,6 +5,10 @@ type (
 		fst A
 		snd B
 	}
+	GuardS[T any] struct {
+		cond bool
+		fn   func() T
+	}
 )
 
 func Take[A ~[]any](src A, num int) A {
@@ -171,4 +175,20 @@ func Minimum[A comparable](src []A) A {
 			return x
 		}
 	}, src[0], src)
+}
+
+func Guard[T any](cond bool, fn func() T) GuardS[T] {
+	return GuardS[T]{
+		cond: cond,
+		fn:   fn,
+	}
+}
+
+func Guards[T any](guards ...GuardS[T]) T {
+	for _, v := range guards {
+		if v.cond {
+			return v.fn()
+		}
+	}
+	panic("not exhaustive guards")
 }

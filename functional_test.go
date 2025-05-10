@@ -840,3 +840,67 @@ func TestMinimum(t *testing.T) {
 		Minimum([]int{})
 	})
 }
+
+func TestGuards(t *testing.T) {
+	t.Run("first guard matches", func(t *testing.T) {
+		result := Guards(
+			Guard(true, func() string { return "first" }),
+			Guard(true, func() string { return "second" }),
+			Guard(true, func() string { return "third" }),
+		)
+		expected := "first"
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("second guard matches", func(t *testing.T) {
+		result := Guards(
+			Guard(false, func() int { return 1 }),
+			Guard(true, func() int { return 2 }),
+			Guard(true, func() int { return 3 }),
+		)
+		expected := 2
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("last guard matches", func(t *testing.T) {
+		result := Guards(
+			Guard(false, func() float64 { return 1.0 }),
+			Guard(false, func() float64 { return 2.0 }),
+			Guard(true, func() float64 { return 3.0 }),
+		)
+		expected := 3.0
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+
+	t.Run("no guard matches panics", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("Expected Guards to panic when no guards match")
+			}
+		}()
+		Guards(
+			Guard(false, func() string { return "first" }),
+			Guard(false, func() string { return "second" }),
+			Guard(false, func() string { return "third" }),
+		)
+	})
+
+	t.Run("use with complex conditions", func(t *testing.T) {
+		age := 25
+		result := Guards(
+			Guard(age < 18, func() string { return "minor" }),
+			Guard(age >= 18 && age < 65, func() string { return "adult" }),
+			Guard(age >= 65, func() string { return "senior" }),
+		)
+		expected := "adult"
+		if result != expected {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+}
