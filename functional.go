@@ -96,22 +96,22 @@ func Last[A any](src []A) A {
 	return src[len(src)-1]
 }
 
-func Any[A any](src []A, fn func(A) bool) bool {
+func Any[A any](fn func(A) bool, src []A) bool {
 	if len(src) == 0 {
 		return false
 	}
 	if fn(Head(src)) {
 		return true
 	}
-	return Any(Tail(src), fn)
+	return Any(fn, Tail(src))
 }
 
-func All[A any](src []A, fn func(A) bool) bool {
+func All[A any](fn func(A) bool, src []A) bool {
 	if len(src) == 0 {
 		return true
 	}
 	if !fn(Head(src)) {
 		return false
 	}
-	return All(Tail(src), fn)
+	return All(fn, Tail(src))
 }

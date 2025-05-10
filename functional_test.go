@@ -443,28 +443,28 @@ func TestLast(t *testing.T) {
 
 func TestAny(t *testing.T) {
 	t.Run("any with match", func(t *testing.T) {
-		result := Any([]int{1, 2, 3, 4, 5}, func(x int) bool { return x%2 == 0 })
+		result := Any(func(x int) bool { return x%2 == 0 }, []int{1, 2, 3, 4, 5})
 		if !result {
 			t.Errorf("Expected Any to return true when there are even numbers")
 		}
 	})
 
 	t.Run("any with no match", func(t *testing.T) {
-		result := Any([]int{1, 3, 5, 7, 9}, func(x int) bool { return x%2 == 0 })
+		result := Any(func(x int) bool { return x%2 == 0 }, []int{1, 3, 5, 7, 9})
 		if result {
 			t.Errorf("Expected Any to return false when there are no even numbers")
 		}
 	})
 
 	t.Run("any with all matches", func(t *testing.T) {
-		result := Any([]int{2, 4, 6, 8}, func(x int) bool { return x%2 == 0 })
+		result := Any(func(x int) bool { return x%2 == 0 }, []int{2, 4, 6, 8})
 		if !result {
 			t.Errorf("Expected Any to return true when all elements match")
 		}
 	})
 
 	t.Run("any with empty slice", func(t *testing.T) {
-		result := Any([]int{}, func(x int) bool { return x%2 == 0 })
+		result := Any(func(x int) bool { return x%2 == 0 }, []int{})
 		if result {
 			t.Errorf("Expected Any to return false for empty slice")
 		}
@@ -473,28 +473,28 @@ func TestAny(t *testing.T) {
 
 func TestAll(t *testing.T) {
 	t.Run("all with all matches", func(t *testing.T) {
-		result := All([]int{2, 4, 6, 8}, func(x int) bool { return x%2 == 0 })
+		result := All(func(x int) bool { return x%2 == 0 }, []int{2, 4, 6, 8})
 		if !result {
 			t.Errorf("Expected All to return true when all elements match")
 		}
 	})
 
 	t.Run("all with some matches", func(t *testing.T) {
-		result := All([]int{2, 4, 5, 6}, func(x int) bool { return x%2 == 0 })
+		result := All(func(x int) bool { return x%2 == 0 }, []int{2, 4, 5, 6})
 		if result {
 			t.Errorf("Expected All to return false when not all elements match")
 		}
 	})
 
 	t.Run("all with no matches", func(t *testing.T) {
-		result := All([]int{1, 3, 5, 7}, func(x int) bool { return x%2 == 0 })
+		result := All(func(x int) bool { return x%2 == 0 }, []int{1, 3, 5, 7})
 		if result {
 			t.Errorf("Expected All to return false when no elements match")
 		}
 	})
 
 	t.Run("all with empty slice", func(t *testing.T) {
-		result := All([]int{}, func(x int) bool { return x%2 == 0 })
+		result := All(func(x int) bool { return x%2 == 0 }, []int{})
 		if !result {
 			t.Errorf("Expected All to return true for empty slice")
 		}
